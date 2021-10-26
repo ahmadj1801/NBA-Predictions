@@ -3,7 +3,7 @@ import pandas as pd
 import sklearn
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.decomposition import PCA
 import os
@@ -212,11 +212,9 @@ def main():
         df = detect_best_players(year, original_season_dict=original_season_dict,  season_dict=season_dict,
                                  all_stars=all_stars)
         path = 'Output/Year ' + str(year) + '/Top 10 Players of ' + str(year) + '.csv'
+        df = df[['firstname', 'lastname', 'pts', 'asts', 'oreb', 'dreb', 'stl', 'blk', 'turnover']]
         df.to_csv(path)
         print('''{}'s Top 10 Players have been Stored in the directory -> {}'''.format(year, path))
-        pass
-
-    pass
 
 
 if __name__ == '__main__':
