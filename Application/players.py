@@ -153,8 +153,10 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
     plt.clf()
 
     df = df[0:10]
-
-    print('== Year {} == \n{} of the predicted ten were All Stars in the selected season'.format(year, c))
+    if year < 2004:
+        print('\n== Year {} == \n{} of the predicted 10 were part of the All Stars in the selected season'.format(year, c))
+    else:
+        print('\n== Year {} == \nNo All Star data for the selected season'.format(year, c))
 
     return df
 
@@ -209,7 +211,9 @@ def main():
             os.mkdir('Output/Year '+str(year))
         df = detect_best_players(year, original_season_dict=original_season_dict,  season_dict=season_dict,
                                  all_stars=all_stars)
-        print(df)
+        path = 'Output/Year ' + str(year) + '/Top 10 Players of ' + str(year) + '.csv'
+        df.to_csv(path)
+        print('''{}'s Top 10 Players have been Stored in the directory -> {}'''.format(year, path))
         pass
 
     pass
