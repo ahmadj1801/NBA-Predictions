@@ -8,6 +8,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.decomposition import PCA
 import os
 
+
 def split_data(standard_season, team_standard_season):
 
     years = [i for i in range(1946, 2005)]
@@ -82,23 +83,29 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
         elif pred[i] == -1:
             c3 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b', marker='*')
     plt.title(str(year) + 'Before Modification')
-    plt.savefig('Output/Year'+str(year)+'/'+str(year) + '.png')
+    plt.savefig('Output/Year '+str(year)+'/'+str(year) + '.png')
     plt.clf()
 
     df = original
     df['x'] = pca_x
     df['y'] = pca_y
 
-    correct = 0
-    total = 0
-    for i in range(len(pred)):
-        if pred[i] == -1:
-            if names[i] in all_star_names:
-                correct += 1
-            total += 1
-        else:
-            c2 = plt.scatter(pca_x[i], pca_y[i], c='r', marker='o')
-            df = df.drop(i)
+    if year < 2004:
+        correct = 0
+        total = 0
+        for i in range(len(pred)):
+            if pred[i] == -1:
+                if names[i] in all_star_names:
+                    correct += 1
+                total += 1
+            else:
+                c2 = plt.scatter(pca_x[i], pca_y[i], c='r', marker='o')
+                df = df.drop(i)
+    else:
+        for i in range(len(pred)):
+            if not pred[i] == -1:
+                c2 = plt.scatter(pca_x[i], pca_y[i], c='r', marker='o')
+                df = df.drop(i)
 
     attributes = ['pts', 'asts', 'oreb', 'dreb', 'stl', 'blk', 'turnover']
 
@@ -120,13 +127,12 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
 
     ids = df.ilkid.tolist()
 
-    all_stars_id = [(id.lower()).strip() for id in all_stars_id]
-    ids = [id.lower() for id in ids]
-
     c = 0
     is_all_star = []
 
     if year < 2004:
+        all_stars_id = [(id.lower()).strip() for id in all_stars_id]
+        ids = [id.lower() for id in ids]
         for id in ids[0:10]:
             if id in all_stars_id:
                 c += 1
@@ -143,7 +149,7 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
         else:
             c2 = plt.scatter(pca_x[i], pca_y[i], c='r', marker='o')
     plt.title(str(year) + 'After Modification')
-    plt.savefig('Output/Year' + str(year) + '/' + str(year) + '_mod.png')
+    plt.savefig('Output/Year ' + str(year) + '/' + str(year) + '_mod.png')
     plt.clf()
 
     df = df[0:10]
@@ -194,8 +200,13 @@ def main():
     line_graph("Number of Players per Year", "Year", "Player Count", years, num_players_per_year)
 
     line_graph("Teams Registered per Year", "Year", "Team Count", years, num_teams_per_year)
+
     years = [i for i in range(2000, 2005)]
+
     for year in years:
+        does_exist = os.path.exists('Output/Year '+str(year))
+        if not does_exist:
+            os.mkdir('Output/Year '+str(year))
         df = detect_best_players(year, original_season_dict=original_season_dict,  season_dict=season_dict,
                                  all_stars=all_stars)
         print(df)
