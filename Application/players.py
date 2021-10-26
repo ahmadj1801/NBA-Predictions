@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.decomposition import PCA
-
+import os
 
 def split_data(standard_season, team_standard_season):
 
@@ -81,8 +81,9 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
             c2 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='r', marker='o')
         elif pred[i] == -1:
             c3 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b', marker='*')
-    plt.title(str(year))
-    plt.show()
+    plt.title(str(year) + 'Before Modification')
+    plt.savefig('Output/Year'+str(year)+'/'+str(year) + '.png')
+    plt.clf()
 
     df = original
     df['x'] = pca_x
@@ -141,15 +142,14 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
             c1 = plt.scatter(pca_x[i], pca_y[i], c='b', marker='*')
         else:
             c2 = plt.scatter(pca_x[i], pca_y[i], c='r', marker='o')
-    plt.show()
+    plt.title(str(year) + 'After Modification')
+    plt.savefig('Output/Year' + str(year) + '/' + str(year) + '_mod.png')
+    plt.clf()
 
     df = df[0:10]
 
     print('== Year {} == \n{} of the predicted ten were All Stars in the selected season'.format(year, c))
 
-    # print(attributes)
-    # print(all_stars_03)
-    # print(df)
     return df
 
 
@@ -161,7 +161,8 @@ def correlation_diagram(df):
                      linewidths=.05)
     f.subplots_adjust(top=0.93)
     t = f.suptitle('Correlation of Basketball Stats', fontsize=14)
-    plt.savefig('correlation.png')
+    plt.savefig('Output/correlation.png')
+    plt.show()
 
 
 def line_graph(title, x_title, y_title, x, y):
@@ -169,6 +170,7 @@ def line_graph(title, x_title, y_title, x, y):
     plt.xlabel(x_title)
     plt.ylabel(y_title)
     plt.title(title)
+    plt.savefig('Output/' + title + '.png')
     plt.show()
 
 
@@ -186,15 +188,16 @@ def main():
     num_players_per_year = [num_players_per_year[year] for year in years]
     num_teams_per_year = [num_teams_per_year[year] for year in years]
 
-    # correlation_diagram(original_season_dict[2004])
+    correlation_diagram(original_season_dict[2004])
     # We can then drop those 6 columns - Highly correlated
 
     line_graph("Number of Players per Year", "Year", "Player Count", years, num_players_per_year)
 
     line_graph("Teams Registered per Year", "Year", "Team Count", years, num_teams_per_year)
-
+    years = [i for i in range(2000, 2005)]
     for year in years:
-        df = detect_best_players(year, original_season_dict=original_season_dict,  season_dict=season_dict, all_stars=all_stars)
+        df = detect_best_players(year, original_season_dict=original_season_dict,  season_dict=season_dict,
+                                 all_stars=all_stars)
         print(df)
         pass
 
