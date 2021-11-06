@@ -162,15 +162,15 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
     return df
 
 
-def correlation_diagram(df):
+def correlation_diagram(df, title):
     # Correlation Matrix Heat map
     f, ax = plt.subplots(figsize=(10, 6))
     corr = df.corr()
     hm = sns.heatmap(round(corr, 2), annot=True, ax=ax, cmap="Spectral", fmt='.2f',
                      linewidths=.05)
     f.subplots_adjust(top=0.93)
-    t = f.suptitle('Correlation of Basketball Stats', fontsize=14)
-    plt.savefig('Output/correlation.png')
+    t = f.suptitle(title, fontsize=14)
+    plt.savefig('Output/'+title+'.png')
     plt.show()
 
 
@@ -197,14 +197,14 @@ def main():
     num_players_per_year = [num_players_per_year[year] for year in years]
     num_teams_per_year = [num_teams_per_year[year] for year in years]
 
-    correlation_diagram(original_season_dict[2004])
+    correlation_diagram(original_season_dict[2004], 'Correlation of Basketball Stats')
     # We can then drop those 6 columns - Highly correlated
 
     for key in original_season_dict:
         original_season_dict[key] = original_season_dict[key].drop(columns=['fgm', 'fga', 'ftm', 'fta', 'tpm', 'tpa'],
                                                                    axis=1)
 
-    correlation_diagram(original_season_dict[2004])
+    correlation_diagram(original_season_dict[2004], 'Updated Correlation of Basketball Stats')
 
     line_graph("Number of Players per Year", "Year", "Player Count", years, num_players_per_year)
 
