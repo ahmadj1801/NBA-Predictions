@@ -7,6 +7,9 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.decomposition import PCA
 import os
+import argparse
+
+START = 2000
 
 
 def split_data(standard_season, team_standard_season):
@@ -49,7 +52,6 @@ def split_data(standard_season, team_standard_season):
 
 
 def detect_best_players(year, original_season_dict, season_dict, all_stars):
-
     if year < 2004:
         all_stars_03 = all_stars[all_stars['year'] == year]
 
@@ -139,7 +141,6 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
                 is_all_star.append('Yes')
             else:
                 is_all_star.append('No')
-        # df['is_all_star'] = is_all_star
 
     pca_x = df.x.tolist()
     pca_y = df.y.tolist()
@@ -162,7 +163,7 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
 
 
 def correlation_diagram(df):
-    # Correlation Matrix Heatmap
+    # Correlation Matrix Heat map
     f, ax = plt.subplots(figsize=(10, 6))
     corr = df.corr()
     hm = sns.heatmap(round(corr, 2), annot=True, ax=ax, cmap="Spectral", fmt='.2f',
@@ -199,11 +200,17 @@ def main():
     correlation_diagram(original_season_dict[2004])
     # We can then drop those 6 columns - Highly correlated
 
+    for key in original_season_dict:
+        original_season_dict[key] = original_season_dict[key].drop(columns=['fgm', 'fga', 'ftm', 'fta', 'tpm', 'tpa'],
+                                                                   axis=1)
+
+    correlation_diagram(original_season_dict[2004])
+
     line_graph("Number of Players per Year", "Year", "Player Count", years, num_players_per_year)
 
     line_graph("Teams Registered per Year", "Year", "Team Count", years, num_teams_per_year)
 
-    years = [i for i in range(2000, 2005)]
+    years = [i for i in range(START, 2005)]
 
     for year in years:
         does_exist = os.path.exists('Output/Year '+str(year))
