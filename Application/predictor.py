@@ -107,6 +107,11 @@ def main():
     # Defensive Network
     defense_mlp = MLPRegressor().fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
 
+    """
+    TODO: Setup AdaBoost Regressor for confidence prediction
+    TODO: Facilitate the loop to ask for 2 input teams
+    TODO: Define a mechanism to smoothly capture the necessary features for prediction
+    """
     pass
 
 
