@@ -8,7 +8,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
 
-START = 1997
+START = 1980
 END = 2005
 
 
@@ -130,7 +130,7 @@ def main():
     defense_mlp = MLPRegressor().fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
 
     # Use ensemble techniques to create a regression confidence predictor
-    confidence_predictor = AdaBoostRegressor(base_estimator=DecisionTreeRegressor(max_depth=2), n_estimators=10,
+    confidence_predictor = AdaBoostRegressor(base_estimator=MLPRegressor(), n_estimators=10,
                                              learning_rate=0.7, loss='square', random_state=43)
 
     # Fit the attacking and conceding points in relation to the winning ratio.
@@ -157,31 +157,44 @@ def main():
         team_a_def = defense_2004.iloc[team_a]
         team_b_attack = attack_2004.iloc[team_b]
         team_b_def = defense_2004.iloc[team_b]
-        '''team_a_pts_scored = defense_mlp.predict([team_a_def])
-        team_b_pts_scored = defense_mlp.predict([team_b_def])
-        team_a_pts_con = attack_mlp.predict([team_b_attack])
-        team_b_pts_con = attack_mlp.predict([team_a_attack])'''
-        # How much will A score given A's attack against a defense
+        # Points that A will score -> Whats B's defense will allow
+        team_a_pts_scored = attack_mlp.predict([team_b_def])
+        # Points that B will score -> What A's defense will allow
+        team_b_pts_scored = attack_mlp.predict([team_a_def])
+        # Points that A will concede -> According to B's attack on Defence
+        team_a_pts_con = defense_mlp.predict([team_b_attack])
+        # Points B will concede -> According to A's attack on defence
+        team_b_pts_con = defense_mlp.predict([team_a_attack])
+        team_a_match = [round(team_a_pts_scored[0]), round(team_a_pts_con[0])]
+        team_b_match = [round(team_b_pts_scored[0]), round(team_b_pts_con[0])]
+        '''# How much will A score given A's attack against a defense
         team_a_pts_scored = defense_mlp.predict([team_a_attack])
-        # How much will B score given B's attack
+        # How much will B score given B's attack against a defence
         team_b_pts_scored = defense_mlp.predict([team_b_attack])
-        team_a_pts_con = attack_mlp.predict([team_b_attack])
-        team_b_pts_con = attack_mlp.predict([team_a_attack])
-        team_a_match = [team_a_pts_scored[0], team_a_pts_con[0]]
-        team_b_match = [team_b_pts_scored[0], team_b_pts_con[0]]
+        # How much will A concede against an attack
+        team_a_pts_con = attack_mlp.predict([team_a_def])
+        # How much will B concede against an attack
+        team_b_pts_con = attack_mlp.predict([team_b_def])
+        team_a_match = [team_a_pts_scored[0], team_b_pts_con[0]]
+        team_b_match = [team_b_pts_con[0], team_a_pts_con[0]]'''
         team_a_win_confidence = confidence_predictor.predict([team_a_match])
         team_b_win_confidence = confidence_predictor.predict([team_b_match])
-        print('''=== Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
-                                                                       teams[team_b], team_dict[teams[team_b]]))
+        print('''===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
+                                                                      teams[team_b], team_dict[teams[team_b]]))
         print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_a], teams[team_a],
-                                                                            team_a_pts_scored, team_a_pts_con,
-                                                                            teams[team_b]))
-
+                                                                            round(team_a_pts_scored[0]),
+                                                                            round(team_a_pts_con[0]), teams[team_b]))
         print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_b], teams[team_a],
-                                                                            team_b_pts_con, team_b_pts_scored, teams[team_b]))
-        print('''{} win probability = {}\n{} win probability = {}'''.format(teams[team_a], str(team_a_win_confidence),
-                                                                            teams[team_b], str(team_b_win_confidence)))
-        pass
+                                                                            round(team_b_pts_con[0]),
+                                                                            round(team_b_pts_scored[0]), teams[team_b]))
+        print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_a],
+                                                                                                          team_a_win_confidence[0]))
+        print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_b],
+                                                                                                          team_b_win_confidence[0]))
+        if team_a_win_confidence[0] >= team_b_win_confidence[0]:
+            print('Winner: {}'.format(teams[team_a]))
+        else:
+            print('Winner: {}'.format(teams[team_b]))
 
     """
     TODO: Measure the model
