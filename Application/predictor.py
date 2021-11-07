@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 import os
+import tabulate
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor
@@ -58,6 +59,21 @@ def offensive_defensive_data(data_dict, cols):
     return df
 
 
+def team_display(teams):
+    display = 'Select an option below or enter -1 to exit:\n'
+    for i in range(len(teams)):
+        if i % 5 == 0:
+            display = display + '\n{} - {}'.format(str(i), teams[i])
+        else:
+            display = display + '\t\t{} - {}'.format(str(i), teams[i])
+    return display
+
+
+def is_exit(a):
+    if a == -1:
+        exit()
+
+
 def main():
     """
     Main Code
@@ -66,6 +82,10 @@ def main():
 
     # Read data
     data = read_data('../Data/team_season.txt')
+
+    results = read_data('../Data/Winners2004.txt')
+
+    team_data = read_data('../Data/teams.txt')
 
     # Get 2004 Data only
     data_2004 = data[data['year'] == 2004]
@@ -115,6 +135,45 @@ def main():
 
     # Fit the attacking and conceding points in relation to the winning ratio.
     confidence_predictor.fit(win_df.drop(columns=['won']), win_df['won'])
+
+    team_dict = dict()
+    for j in range(len(teams)):
+        team = teams[j]
+        names = team_data['name'].tolist()
+        name = names[team_data['team'].tolist().index(team.upper())]
+        team_dict[team] = name
+
+    attack_2004 = attack_2004.drop(columns=['o_pts'], axis=1)
+    defense_2004 = defense_2004.drop(columns=['d_pts'], axis=1)
+    team_a = 0
+    team_b = 0
+    while not team_a == -1 or not team_b == -1:
+        print('\n', team_display(teams))
+        team_a = int(input('Input the Home Team Number from the list above: '))
+        is_exit(team_a)
+        team_b = int(input('Input the Away Team Number from the list above: '))
+        is_exit(team_b)
+        team_a_attack = attack_2004.iloc[team_a]
+        team_a_def = defense_2004.iloc[team_a]
+        team_b_attack = attack_2004.iloc[team_b]
+        team_b_def = defense_2004.iloc[team_b]
+        '''team_a_pts_scored = defense_mlp.predict([team_a_def])
+        team_b_pts_scored = defense_mlp.predict([team_b_def])
+        team_a_pts_con = attack_mlp.predict([team_b_attack])
+        team_b_pts_con = attack_mlp.predict([team_a_attack])'''
+        team_a_pts_scored = defense_mlp.predict([team_a_attack])
+        team_b_pts_scored = defense_mlp.predict([team_b_attack])
+        team_a_pts_con = attack_mlp.predict([team_b_attack])
+        team_b_pts_con = attack_mlp.predict([team_a_attack])
+        team_a_match = [team_a_pts_scored[0], team_a_pts_con[0]]
+        team_b_match = [team_b_pts_scored[0], team_b_pts_con[0]]
+        team_a_win_confidence = confidence_predictor.predict([team_a_match])
+        team_b_win_confidence = confidence_predictor.predict([team_b_match])
+        print('''=== Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
+                                                                       teams[team_b], team_dict[teams[team_b]]))
+        print('''{} win probability = {}\n{} win probability = {}'''.format(teams[team_a], str(team_a_win_confidence),
+                                                                            teams[team_b], str(team_b_win_confidence)))
+        pass
 
     """
     TODO: Setup AdaBoost Regressor for confidence prediction
