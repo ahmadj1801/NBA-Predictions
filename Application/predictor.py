@@ -173,6 +173,12 @@ def main():
         team_b_win_confidence = confidence_predictor.predict([team_b_match])
         print('''=== Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
                                                                        teams[team_b], team_dict[teams[team_b]]))
+        print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_a], teams[team_a],
+                                                                            team_a_pts_scored, team_a_pts_con,
+                                                                            teams[team_b]))
+
+        print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_b], teams[team_a],
+                                                                            team_b_pts_con, team_b_pts_scored, teams[team_b]))
         print('''{} win probability = {}\n{} win probability = {}'''.format(teams[team_a], str(team_a_win_confidence),
                                                                             teams[team_b], str(team_b_win_confidence)))
         pass
