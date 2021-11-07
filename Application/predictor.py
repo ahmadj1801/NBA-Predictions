@@ -178,9 +178,7 @@ def main():
         pass
 
     """
-    TODO: Setup AdaBoost Regressor for confidence prediction
-    TODO: Facilitate the loop to ask for 2 input teams
-    TODO: Define a mechanism to smoothly capture the necessary features for prediction
+    TODO: Measure the model
     """
     pass
 
