@@ -161,7 +161,9 @@ def main():
         team_b_pts_scored = defense_mlp.predict([team_b_def])
         team_a_pts_con = attack_mlp.predict([team_b_attack])
         team_b_pts_con = attack_mlp.predict([team_a_attack])'''
+        # How much will A score given A's attack against a defense
         team_a_pts_scored = defense_mlp.predict([team_a_attack])
+        # How much will B score given B's attack
         team_b_pts_scored = defense_mlp.predict([team_b_attack])
         team_a_pts_con = attack_mlp.predict([team_b_attack])
         team_b_pts_con = attack_mlp.predict([team_a_attack])
