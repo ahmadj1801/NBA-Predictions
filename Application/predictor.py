@@ -6,7 +6,6 @@ import tabulate
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor
-from sklearn.tree import DecisionTreeRegressor
 
 START = 1980
 END = 2005
@@ -167,16 +166,7 @@ def main():
         team_b_pts_con = defense_mlp.predict([team_a_attack])
         team_a_match = [round(team_a_pts_scored[0]), round(team_a_pts_con[0])]
         team_b_match = [round(team_b_pts_scored[0]), round(team_b_pts_con[0])]
-        '''# How much will A score given A's attack against a defense
-        team_a_pts_scored = defense_mlp.predict([team_a_attack])
-        # How much will B score given B's attack against a defence
-        team_b_pts_scored = defense_mlp.predict([team_b_attack])
-        # How much will A concede against an attack
-        team_a_pts_con = attack_mlp.predict([team_a_def])
-        # How much will B concede against an attack
-        team_b_pts_con = attack_mlp.predict([team_b_def])
-        team_a_match = [team_a_pts_scored[0], team_b_pts_con[0]]
-        team_b_match = [team_b_pts_con[0], team_a_pts_con[0]]'''
+
         team_a_win_confidence = confidence_predictor.predict([team_a_match])
         team_b_win_confidence = confidence_predictor.predict([team_b_match])
         print('''===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
