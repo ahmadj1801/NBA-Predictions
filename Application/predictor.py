@@ -4,6 +4,8 @@ import sklearn
 import os
 
 from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.tree import DecisionTreeRegressor
 
 START = 1997
 END = 2005
@@ -106,6 +108,13 @@ def main():
 
     # Defensive Network
     defense_mlp = MLPRegressor().fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
+
+    # Use ensemble techniques to create a regression confidence predictor
+    confidence_predictor = AdaBoostRegressor(base_estimator=DecisionTreeRegressor(max_depth=2), n_estimators=10,
+                                             learning_rate=0.7, loss='square', random_state=43)
+
+    # Fit the attacking and conceding points in relation to the winning ratio.
+    confidence_predictor.fit(win_df.drop(columns=['won']), win_df['won'])
 
     """
     TODO: Setup AdaBoost Regressor for confidence prediction
