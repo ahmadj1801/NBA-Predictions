@@ -73,6 +73,79 @@ def is_exit(a):
         exit()
 
 
+def evaluate(results, team_dict, attack_mlp, defence_mlp, confidence_predictor, attack_2004, defence_2004, teams):
+    visitor = results['Visitor/Neutral'].tolist()
+    visitor_pts = results['PTS'].tolist()
+    home = results['Home/Neutral'].tolist()
+    home_pts = results['PTS.1'].tolist()
+    winner = []
+    for key in team_dict:
+        for i in range(len(home)):
+            key_name = team_dict[key]
+            if key_name in home[i]:
+                home[i] = key
+            if key_name in visitor[i]:
+                visitor[i] = key
+
+    for i in range(len(home)):
+        if home_pts[i] >= visitor_pts[i]:
+            winner.append(home[i])
+        else:
+            winner.append(visitor[i])
+
+    correct = 0
+    for i in range(len(home)):
+        home_team = home[i]
+        away_team = visitor[i]
+        team_a = teams.index(home_team)
+        team_b = teams.index(away_team)
+        team_a_win_confidence, team_b_win_confidence = predict_outcome(team_a, team_b, attack_mlp, defence_mlp, confidence_predictor, attack_2004, defence_2004, teams, team_dict)
+        game_winner = ''
+        print('Winner: {}'.format(winner[i]))
+        if team_a_win_confidence[0] >= team_b_win_confidence[0]:
+            print('Predicted Winner: {}'.format(teams[team_a]))
+            game_winner = home_team
+        else:
+            print('Predicted Winner: {}'.format(teams[team_b]))
+            game_winner = away_team
+        if game_winner == winner[i]:
+            correct += 1
+    return correct/len(home)
+
+
+def predict_outcome(team_a, team_b, attack_mlp, defense_mlp, confidence_predictor, attack_2004, defense_2004, teams, team_dict):
+    team_a_attack = attack_2004.iloc[team_a]
+    team_a_def = defense_2004.iloc[team_a]
+    team_b_attack = attack_2004.iloc[team_b]
+    team_b_def = defense_2004.iloc[team_b]
+    # Points that A will score -> Whats B's defense will allow
+    team_a_pts_scored = attack_mlp.predict([team_b_def])
+    # Points that B will score -> What A's defense will allow
+    team_b_pts_scored = attack_mlp.predict([team_a_def])
+    # Points that A will concede -> According to B's attack on Defence
+    team_a_pts_con = defense_mlp.predict([team_b_attack])
+    # Points B will concede -> According to A's attack on defence
+    team_b_pts_con = defense_mlp.predict([team_a_attack])
+    team_a_match = [round(team_a_pts_scored[0]), round(team_a_pts_con[0])]
+    team_b_match = [round(team_b_pts_scored[0]), round(team_b_pts_con[0])]
+
+    team_a_win_confidence = confidence_predictor.predict([team_a_match])
+    team_b_win_confidence = confidence_predictor.predict([team_b_match])
+    print('''===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
+                                                                  teams[team_b], team_dict[teams[team_b]]))
+    print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_a], teams[team_a],
+                                                                        round(team_a_pts_scored[0]),
+                                                                        round(team_a_pts_con[0]), teams[team_b]))
+    print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_b], teams[team_a],
+                                                                        round(team_b_pts_con[0]),
+                                                                        round(team_b_pts_scored[0]), teams[team_b]))
+    print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_a],
+                                                                                                      team_a_win_confidence[0]))
+    print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_b],
+                                                                                                      team_b_win_confidence[0]))
+    return team_a_win_confidence, team_b_win_confidence
+
+
 def main():
     """
     Main Code
@@ -146,41 +219,17 @@ def main():
     defense_2004 = defense_2004.drop(columns=['d_pts'], axis=1)
     team_a = 0
     team_b = 0
+
+    accuracy = evaluate(results, team_dict, attack_mlp, defense_mlp, confidence_predictor, attack_2004, defense_2004, teams)
+    print('Accuracy =', accuracy)
+
     while not team_a == -1 or not team_b == -1:
         print('\n', team_display(teams))
         team_a = int(input('Input the Home Team Number from the list above: '))
         is_exit(team_a)
         team_b = int(input('Input the Away Team Number from the list above: '))
         is_exit(team_b)
-        team_a_attack = attack_2004.iloc[team_a]
-        team_a_def = defense_2004.iloc[team_a]
-        team_b_attack = attack_2004.iloc[team_b]
-        team_b_def = defense_2004.iloc[team_b]
-        # Points that A will score -> Whats B's defense will allow
-        team_a_pts_scored = attack_mlp.predict([team_b_def])
-        # Points that B will score -> What A's defense will allow
-        team_b_pts_scored = attack_mlp.predict([team_a_def])
-        # Points that A will concede -> According to B's attack on Defence
-        team_a_pts_con = defense_mlp.predict([team_b_attack])
-        # Points B will concede -> According to A's attack on defence
-        team_b_pts_con = defense_mlp.predict([team_a_attack])
-        team_a_match = [round(team_a_pts_scored[0]), round(team_a_pts_con[0])]
-        team_b_match = [round(team_b_pts_scored[0]), round(team_b_pts_con[0])]
-
-        team_a_win_confidence = confidence_predictor.predict([team_a_match])
-        team_b_win_confidence = confidence_predictor.predict([team_b_match])
-        print('''===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
-                                                                      teams[team_b], team_dict[teams[team_b]]))
-        print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_a], teams[team_a],
-                                                                            round(team_a_pts_scored[0]),
-                                                                            round(team_a_pts_con[0]), teams[team_b]))
-        print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_b], teams[team_a],
-                                                                            round(team_b_pts_con[0]),
-                                                                            round(team_b_pts_scored[0]), teams[team_b]))
-        print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_a],
-                                                                                                          team_a_win_confidence[0]))
-        print('''Given the scoreline, {} think they have a confidence of {} of winning the game'''.format(teams[team_b],
-                                                                                                          team_b_win_confidence[0]))
+        team_a_win_confidence, team_b_win_confidence = predict_outcome(team_a, team_b, attack_mlp, defense_mlp, confidence_predictor, attack_2004, defense_2004, teams, team_dict)
         if team_a_win_confidence[0] >= team_b_win_confidence[0]:
             print('Winner: {}'.format(teams[team_a]))
         else:
