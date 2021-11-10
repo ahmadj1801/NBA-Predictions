@@ -6,6 +6,7 @@ import tabulate
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor
+from sklearn.svm import SVR
 
 START = 1980
 END = 2005
@@ -131,7 +132,7 @@ def predict_outcome(team_a, team_b, attack_mlp, defense_mlp, confidence_predicto
 
     team_a_win_confidence = confidence_predictor.predict([team_a_match])
     team_b_win_confidence = confidence_predictor.predict([team_b_match])
-    print('''===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
+    print('''\n===Match Prediction===\n{} ({}) VS {} ({})'''.format(teams[team_a], team_dict[teams[team_a]],
                                                                   teams[team_b], team_dict[teams[team_b]]))
     print('''According to {}, the score will be {} {} : {} {}'''.format(teams[team_a], teams[team_a],
                                                                         round(team_a_pts_scored[0]),
@@ -196,17 +197,29 @@ def main():
     win_df = offensive_defensive_data(data_dict, win_loss_cols)
 
     # Attacking Network
-    attack_mlp = MLPRegressor().fit(attacking_df.drop(columns=['o_pts']), attacking_df['o_pts'])
+    attack_mlp = MLPRegressor(solver='lbfgs', max_iter=1000, early_stopping=True).fit(attacking_df.drop(columns=['o_pts']), attacking_df['o_pts'])
 
     # Defensive Network
-    defense_mlp = MLPRegressor().fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
+    defense_mlp = MLPRegressor(solver='lbfgs', max_iter=1000, early_stopping=True).fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
 
     # Use ensemble techniques to create a regression confidence predictor
-    confidence_predictor = AdaBoostRegressor(base_estimator=MLPRegressor(), n_estimators=10,
+    confidence_predictor = AdaBoostRegressor(base_estimator=MLPRegressor(solver='lbfgs'), n_estimators=60,
                                              learning_rate=0.7, loss='square', random_state=43)
 
     # Fit the attacking and conceding points in relation to the winning ratio.
     confidence_predictor.fit(win_df.drop(columns=['won']), win_df['won'])
+
+    attack_svr = SVR().fit(attacking_df.drop(columns=['o_pts']), attacking_df['o_pts'])
+
+    # Defensive Network
+    defense_svr = SVR().fit(def_df.drop(columns=['d_pts']), def_df['d_pts'])
+
+    # Use ensemble techniques to create a regression confidence predictor
+    confidence_predictor2 = AdaBoostRegressor(base_estimator=SVR(), n_estimators=50, learning_rate=0.7,
+                                              loss='square', random_state=43)
+
+    # Fit the attacking and conceding points in relation to the winning ratio.
+    confidence_predictor2.fit(win_df.drop(columns=['won']), win_df['won'])
 
     team_dict = dict()
     for j in range(len(teams)):
@@ -220,8 +233,12 @@ def main():
     team_a = 0
     team_b = 0
 
-    accuracy = evaluate(results, team_dict, attack_mlp, defense_mlp, confidence_predictor, attack_2004, defense_2004, teams)
-    print('Accuracy =', accuracy)
+    accuracy = evaluate(results, team_dict, attack_mlp, defense_mlp, confidence_predictor, attack_2004, defense_2004,
+                        teams)
+    accuracy_svr = evaluate(results, team_dict, attack_svr, defense_svr, confidence_predictor2, attack_2004,
+                            defense_2004, teams)
+    print('Accuracy of MLP =', accuracy)
+    print('Accuracy of SVR =', accuracy_svr)
 
     while not team_a == -1 or not team_b == -1:
         print('\n', team_display(teams))
