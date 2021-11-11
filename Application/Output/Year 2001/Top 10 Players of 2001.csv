@@ -1,5 +1,6 @@
 ,firstname,lastname,pts,asts,oreb,dreb,stl,blk,turnover
 437,Reggie,Miller,1304,253,23,196,88,10,120.0
+435,Alonzo,Mourning,1178,87,182,450,27,186,182.0
 424,Jason,Terry,1504,444,40,230,144,13,181.0
 415,Cuttino,Mobley,1606,187,63,237,109,37,180.0
 411,Shaquille,O'neal,1822,200,235,480,41,137,171.0
@@ -7,5 +8,4 @@
 395,Steve,Nash,1466,634,50,204,53,4,229.0
 378,Tracy,Mcgrady,1948,400,150,446,119,73,189.0
 366,Jamaal,Tinsley,751,647,78,220,138,40,270.0
-360,Karl,Malone,1788,341,142,544,152,59,263.0
-359,Stephon,Marbury,1674,666,75,191,77,13,284.0
+363,Anthony,Mason,787,346,125,521,57,22,130.0
