@@ -184,6 +184,14 @@ def line_graph(title, x_title, y_title, x, y):
 
 
 def main():
+
+    parser = argparse.ArgumentParser(description='Outstanding Player Detection')
+    parser.add_argument('--start', type=int, default=2000, help='The year to start detection from')
+    parser.add_argument('-f')
+    arguments = parser.parse_args()
+    global START
+    START = arguments.start
+
     standard_season = pd.read_csv('../Data/player_regular_season.txt')
     standard_season = standard_season.groupby(['ilkid', 'year', 'firstname', 'lastname'], as_index=False).sum()
     standard_season = standard_season.sort_values('year')

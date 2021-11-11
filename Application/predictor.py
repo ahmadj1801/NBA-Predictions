@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 import sklearn
-import os
-import tabulate
+import argparse
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor
@@ -152,6 +151,13 @@ def main():
     Main Code
     :return: No Return
     """
+
+    parser = argparse.ArgumentParser(description='Outstanding Player Detection')
+    parser.add_argument('--start', type=int, default=2000, help='The year to start collecting data from')
+    parser.add_argument('-f')
+    arguments = parser.parse_args()
+    global START
+    START = arguments.start
 
     # Read data
     data = read_data('../Data/team_season.txt')
