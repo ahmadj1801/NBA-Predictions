@@ -34,4 +34,6 @@ Match predictions were facilitated through an Attack Defense Win Model. The foll
 * The win ensemble model is trained by considering offensive points in relation to the defensive points coneded and learning a confidence threshold.
 
 ## Code
-* Refer to the Deployment Guide for instructions.
+* `python players.py`
+* `python predictor.py`
+* Refer to the Deployment Guide for instructions on using parameters.
