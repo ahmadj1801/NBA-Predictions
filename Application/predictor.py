@@ -21,7 +21,7 @@ def read_data(path):
     return data
 
 
-def pre_process_data(data, start=1997, end=2005):
+def pre_process_data(data, start=1980, end=2005):
     """
     Store the data by year, as well as convert the stats to per game stats.
     Example: {2002: DataFrame, 2003: DataFrame}
