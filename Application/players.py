@@ -66,7 +66,7 @@ def detect_best_players(year, original_season_dict, season_dict, all_stars):
     names = original.firstname.tolist()
     surnames = original.lastname.tolist()
 
-    clf = IsolationForest(contamination=0.1)
+    clf = IsolationForest(n_estimators=10, contamination=0.1)
     pred = clf.fit_predict(data)
 
     pca = PCA(n_components=2).fit(data)
