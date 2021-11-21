@@ -14,7 +14,7 @@ With this implementation, we seek to explore avenues in which we utilise statist
 ## Proposed Model
 
 ### Outstanding Player Detection
-The apprach used to detect out standing players follows the following pipeline:
+The approach used to detect out standing players follows the following pipeline:
 * Data Pre-Processing
 * Isolation Forest Anomaly Detection
 * Principal Component Analysis (PCA) for visualization
@@ -27,7 +27,7 @@ Using PCA for visualization is seen below. The two images depict the selected pl
 
 
 ### Match Prediction
-Match predictions were facilitated through an Attack Defense Win Model. The following summary can be used to explain the approach (Refer to the paperfor specific details and application of the models).
+Match predictions were facilitated through an Attack Defense Win Model. The following summary can be used to explain the approach (Refer to the paper for specific details and application of the models).
 * The data is normalised to represent per game stats
 * The attacking MLP is trained by using the attacking data
 * The defensive MLP is trained using the defensive data
