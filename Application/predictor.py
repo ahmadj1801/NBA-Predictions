@@ -258,9 +258,6 @@ def main():
         else:
             print('Winner: {}'.format(teams[team_b]))
 
-    """
-    TODO: Measure the model
-    """
     pass
 
 
